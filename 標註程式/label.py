@@ -39,6 +39,10 @@ class Ui_MainWindow(object):
         self.Output_mask_button.setGeometry(QtCore.QRect(270, 20, 80, 31))
         self.Output_mask_button.setText("Output_mask")
         self.Output_mask_button.clicked.connect(self.Output_mask)
+        self.Output_shade_button = QtWidgets.QPushButton(self.centralwidget)
+        self.Output_shade_button.setGeometry(QtCore.QRect(370, 20, 80, 31))
+        self.Output_shade_button.setText("Output_shade")
+        self.Output_shade_button.clicked.connect(self.Output_shade)
         self.Poly_finish_button = QtWidgets.QPushButton(self.centralwidget)
         self.Poly_finish_button.setGeometry(QtCore.QRect(100, 20, 80, 31))
         self.Poly_finish_button.setText("Poly_finish")
@@ -49,7 +53,7 @@ class Ui_MainWindow(object):
         self.toolButton.setText("Open File")
         self.toolButton.clicked.connect(self.read)   
         self.orient_button = QtWidgets.QPushButton(self.centralwidget)
-        self.orient_button.setGeometry(QtCore.QRect(370, 20, 80, 31))
+        self.orient_button.setGeometry(QtCore.QRect(470, 20, 80, 31))
         self.orient_button.setText("回傳定位")
         self.orient_button.clicked.connect(self.Orient_Value)
         # self.input_box = QLineEdit(self)
@@ -182,6 +186,7 @@ class label(QtWidgets.QMainWindow,Ui_MainWindow):
             bytesPerLine = 3 * width
             qImg = QtGui.QImage(self.img.data, width, height, bytesPerLine, QtGui.QImage.Format_RGB888).rgbSwapped()
             self.photo = QPixmap.fromImage(qImg).scaled(self.graphicsView.width(), self.graphicsView.height(), Qt.KeepAspectRatio)
+            #self.photo = QPixmap.fromImage(qImg)
             self.graphicsView.scene = QtWidgets.QGraphicsScene(self)
             self.graphicsView.setScene(self.graphicsView.scene)
             self.graphicsView.scene.clear()
@@ -575,21 +580,6 @@ class label(QtWidgets.QMainWindow,Ui_MainWindow):
                     dict.setdefault("points", points)
                     dict.setdefault("shape_type","polygon")
                     self.shapes.append(dict)
-
-                elif isinstance(item, QtWidgets.QGraphicsRectItem) and item.pen().color() == QtGui.QColor("black") and self.fill:
-                    dict = {}
-                    rect = item.rect()
-                    points = []
-                    points.append([int(rect.x()*self.scaleX), int(rect.y()*self.scaleY)])
-                    points.append([int(rect.x()*self.scaleX), int((rect.y()+rect.height())*self.scaleY)])
-                    points.append([int((rect.x()+rect.width())*self.scaleX), int((rect.y()+rect.height())*self.scaleY)])
-                    points.append([int((rect.x()+rect.width())*self.scaleX), int(rect.y()*self.scaleY)])    
-                    points = self.correction_points(points)       
-                    print(f"Shade: {points}")
-                    dict.setdefault("label", "shade")
-                    dict.setdefault("points", points)
-                    dict.setdefault("shape_type","polygon")
-                    self.shapes.append(dict)
                 
                 elif isinstance(item, QtWidgets.QGraphicsPolygonItem) and item.pen().color() == QtGui.QColor("red") and self.fill:
                     dict = {}
@@ -601,20 +591,6 @@ class label(QtWidgets.QMainWindow,Ui_MainWindow):
                     points = self.correction_points(points)
                     print(f"Polygon: {points}")
                     dict.setdefault("label", "defect")
-                    dict.setdefault("points", points)
-                    dict.setdefault("shape_type","polygon")
-                    self.shapes.append(dict)
-
-                elif isinstance(item, QtWidgets.QGraphicsPolygonItem) and item.pen().color() == QtGui.QColor("black") and self.fill:
-                    dict = {}
-                    poly = item.polygon()
-                    points = []
-                    for i in range(poly.size()):
-                        point = poly.at(i)
-                        points.append([int(point.x()*self.scaleX), int(point.y()*self.scaleY)])
-                    points = self.correction_points(points)
-                    print(f"Polygon: {points}")
-                    dict.setdefault("label", "shade")
                     dict.setdefault("points", points)
                     dict.setdefault("shape_type","polygon")
                     self.shapes.append(dict)
@@ -633,20 +609,6 @@ class label(QtWidgets.QMainWindow,Ui_MainWindow):
                     dict.setdefault("shape_type","frame")
                     self.shapes.append(dict)
 
-                elif isinstance(item, QtWidgets.QGraphicsPathItem) and item.pen().color() == QtGui.QColor("black") and self.fill:
-                    dict = {}
-                    path = item.path()
-                    points = []
-                    for i in range(path.elementCount()):
-                        point = path.elementAt(i)
-                        points.append([int(point.x*self.scaleX), int(point.y*self.scaleY)])
-                    points = self.correction_points(points)
-                    print(f"Frame: {points}")
-                    dict.setdefault("label", "shade")
-                    dict.setdefault("points", points)
-                    dict.setdefault("shape_type","frame")
-                    self.shapes.append(dict)
-
                 elif isinstance(item, QtWidgets.QGraphicsRectItem) and item.pen().color() == QtGui.QColor("red") and self.space:
                     dict = {}
                     rect = item.rect()
@@ -661,22 +623,7 @@ class label(QtWidgets.QMainWindow,Ui_MainWindow):
                     dict.setdefault("points", points)
                     dict.setdefault("shape_type","polygon")
                     self.shapes.append(dict)
-
-                elif isinstance(item, QtWidgets.QGraphicsRectItem) and item.pen().color() == QtGui.QColor("black") and self.space:
-                    dict = {}
-                    rect = item.rect()
-                    points = []
-                    points.append([int(rect.x()*self.scalefactor), int(rect.y()*self.scalefactor)])
-                    points.append([int(rect.x()*self.scalefactor), int((rect.y()+rect.height())*self.scalefactor)])
-                    points.append([int((rect.x()+rect.width())*self.scalefactor), int((rect.y()+rect.height())*self.scalefactor)])
-                    points.append([int((rect.x()+rect.width())*self.scalefactor), int(rect.y()*self.scalefactor)]) 
-                    points = self.correction_points(points)          
-                    print(f"Shade: {points}")
-                    dict.setdefault("label", "shade")
-                    dict.setdefault("points", points)
-                    dict.setdefault("shape_type","polygon")
-                    self.shapes.append(dict)
-                
+ 
                 elif isinstance(item, QtWidgets.QGraphicsPolygonItem) and item.pen().color() == QtGui.QColor("red") and self.space:
                     dict = {}
                     poly = item.polygon()
@@ -687,20 +634,6 @@ class label(QtWidgets.QMainWindow,Ui_MainWindow):
                     points = self.correction_points(points)
                     print(f"Polygon: {points}")
                     dict.setdefault("label", "defect")
-                    dict.setdefault("points", points)
-                    dict.setdefault("shape_type","polygon")
-                    self.shapes.append(dict)
-
-                elif isinstance(item, QtWidgets.QGraphicsPolygonItem) and item.pen().color() == QtGui.QColor("black") and self.space:
-                    dict = {}
-                    poly = item.polygon()
-                    points = []
-                    for i in range(poly.size()):
-                        point = poly.at(i)
-                        points.append([int(point.x()*self.scalefactor), int(point.y()*self.scalefactor)])
-                    points = self.correction_points(points)
-                    print(f"Polygon: {points}")
-                    dict.setdefault("label", "shade")
                     dict.setdefault("points", points)
                     dict.setdefault("shape_type","polygon")
                     self.shapes.append(dict)
@@ -719,19 +652,6 @@ class label(QtWidgets.QMainWindow,Ui_MainWindow):
                     dict.setdefault("shape_type","frame")
                     self.shapes.append(dict)
 
-                elif isinstance(item, QtWidgets.QGraphicsPathItem) and item.pen().color() == QtGui.QColor("black") and self.space:
-                    dict = {}
-                    path = item.path()
-                    points = []
-                    for i in range(path.elementCount()):
-                        point = path.elementAt(i)
-                        points.append([int(point.x*self.scalefactor), int(point.y*self.scalefactor)])
-                    points = self.correction_points(points)
-                    print(f"Frame: {points}")
-                    dict.setdefault("label", "shade")
-                    dict.setdefault("points", points)
-                    dict.setdefault("shape_type","frame")
-                    self.shapes.append(dict)
             #移除相同點
             # new_shapes = []
             # for shape in self.shapes:
@@ -766,6 +686,105 @@ class label(QtWidgets.QMainWindow,Ui_MainWindow):
             #     shape_type = shape["shape_type"]
                 
             
+        else:
+            print("Please load an image first.")
+            
+    def Output_shade(self):
+        self.shapes = []
+        if self.image_loaded:
+            for item in self.graphicsView.scene.items():
+                if isinstance(item, QtWidgets.QGraphicsRectItem) and item.pen().color() == QtGui.QColor("black") and self.fill:
+                    dict = {}
+                    rect = item.rect()
+                    points = []
+                    points.append([int(rect.x()*self.scaleX), int(rect.y()*self.scaleY)])
+                    points.append([int(rect.x()*self.scaleX), int((rect.y()+rect.height())*self.scaleY)])
+                    points.append([int((rect.x()+rect.width())*self.scaleX), int((rect.y()+rect.height())*self.scaleY)])
+                    points.append([int((rect.x()+rect.width())*self.scaleX), int(rect.y()*self.scaleY)])    
+                    points = self.correction_points(points)       
+                    print(f"Shade: {points}")
+                    dict.setdefault("label", "shade")
+                    dict.setdefault("points", points)
+                    dict.setdefault("shape_type","polygon")
+                    self.shapes.append(dict)
+
+                elif isinstance(item, QtWidgets.QGraphicsPolygonItem) and item.pen().color() == QtGui.QColor("black") and self.fill:
+                    dict = {}
+                    poly = item.polygon()
+                    points = []
+                    for i in range(poly.size()):
+                        point = poly.at(i)
+                        points.append([int(point.x()*self.scaleX), int(point.y()*self.scaleY)])
+                    points = self.correction_points(points)
+                    print(f"Polygon: {points}")
+                    dict.setdefault("label", "shade")
+                    dict.setdefault("points", points)
+                    dict.setdefault("shape_type","polygon")
+                    self.shapes.append(dict)
+
+                elif isinstance(item, QtWidgets.QGraphicsPathItem) and item.pen().color() == QtGui.QColor("black") and self.fill:
+                    dict = {}
+                    path = item.path()
+                    points = []
+                    for i in range(path.elementCount()):
+                        point = path.elementAt(i)
+                        points.append([int(point.x*self.scaleX), int(point.y*self.scaleY)])
+                    points = self.correction_points(points)
+                    print(f"Frame: {points}")
+                    dict.setdefault("label", "shade")
+                    dict.setdefault("points", points)
+                    dict.setdefault("shape_type","frame")
+                    self.shapes.append(dict)
+
+                elif isinstance(item, QtWidgets.QGraphicsRectItem) and item.pen().color() == QtGui.QColor("black") and self.space:
+                    dict = {}
+                    rect = item.rect()
+                    points = []
+                    points.append([int(rect.x()*self.scalefactor), int(rect.y()*self.scalefactor)])
+                    points.append([int(rect.x()*self.scalefactor), int((rect.y()+rect.height())*self.scalefactor)])
+                    points.append([int((rect.x()+rect.width())*self.scalefactor), int((rect.y()+rect.height())*self.scalefactor)])
+                    points.append([int((rect.x()+rect.width())*self.scalefactor), int(rect.y()*self.scalefactor)]) 
+                    points = self.correction_points(points)          
+                    print(f"Shade: {points}")
+                    dict.setdefault("label", "shade")
+                    dict.setdefault("points", points)
+                    dict.setdefault("shape_type","polygon")
+                    self.shapes.append(dict)
+            
+                elif isinstance(item, QtWidgets.QGraphicsPolygonItem) and item.pen().color() == QtGui.QColor("black") and self.space:
+                    dict = {}
+                    poly = item.polygon()
+                    points = []
+                    for i in range(poly.size()):
+                        point = poly.at(i)
+                        points.append([int(point.x()*self.scalefactor), int(point.y()*self.scalefactor)])
+                    points = self.correction_points(points)
+                    print(f"Polygon: {points}")
+                    dict.setdefault("label", "shade")
+                    dict.setdefault("points", points)
+                    dict.setdefault("shape_type","polygon")
+                    self.shapes.append(dict)
+
+    
+                elif isinstance(item, QtWidgets.QGraphicsPathItem) and item.pen().color() == QtGui.QColor("black") and self.space:
+                    dict = {}
+                    path = item.path()
+                    points = []
+                    for i in range(path.elementCount()):
+                        point = path.elementAt(i)
+                        points.append([int(point.x*self.scalefactor), int(point.y*self.scalefactor)])
+                    points = self.correction_points(points)
+                    print(f"Frame: {points}")
+                    dict.setdefault("label", "shade")
+                    dict.setdefault("points", points)
+                    dict.setdefault("shape_type","frame")
+                    self.shapes.append(dict)
+
+            self.shapes = self.remove_dicts_with_same_points(self.shapes)
+            print(self.shapes)
+            self.dict['shapes'] = self.shapes
+            with open(self.path+self.name +"_shade.json", "w") as f:
+                json.dump(self.dict, f, indent = 4)
         else:
             print("Please load an image first.")
             
